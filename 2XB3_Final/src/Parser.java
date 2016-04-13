@@ -99,7 +99,7 @@ public class Parser {
 					for (int i = 0; i < lines.length; i++) {
 						if (binarySearch(lines[i])) {
 							System.out.print(lines[i] + " removed " + line + "   AFTER  ");
-							line = line.replace("  " + lines[i] + "" , "");
+							line = line.replace("  " + lines[i] , "");
 							System.out.println(line);
 							counter++;
 						}
