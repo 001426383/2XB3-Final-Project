@@ -1,19 +1,17 @@
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 
 public class Main {
-	private static Graph g;
+	private static Graph g = new Graph();
 	private static final String[] EMPTY_ARRAY = new String[0];
-	
+
 	public static void main(String[] args) {
 
-		g = new Graph();
-		String ASIN = "", author = "";
+		
+		String ASIN = "", author = "",title = "";
 		String line;
 		String[] similar = null;
 		float salesRank = 0, rating = 0;
@@ -22,14 +20,25 @@ public class Main {
 			BufferedReader br = new BufferedReader(new FileReader(new File("Output.txt")));
 
 			while ((line = br.readLine()) != null) {
-				
+
 				if (line.startsWith("ASIN:")) {
-					
+
 					ASIN = line.replace("ASIN: ", "");
 					while ((line = br.readLine()) != null) {
+						if (line.startsWith("  title:")) {
+							line = line.replace("  title: ","");
+							line = line.trim();
+							title = line;
+							break;
+						}
+					}
+					while ((line = br.readLine()) != null) {
 						if (line.startsWith("  salesrank:")) {
-							line = line.replace("  salesrank: ", "");
-							salesRank = Float.parseFloat(line);
+							String temp = line.replace("  salesrank: ", "");
+							salesRank = Float.parseFloat(temp);
+						//	if (salesRank > 548552) {
+								// System.out.println(line);
+						//	}
 							break;
 						}
 					}
@@ -44,7 +53,7 @@ public class Main {
 							break;
 						}
 					}
-					
+
 					while ((line = br.readLine()) != null) {
 						if (line.startsWith("  reviews:")) {
 							line = line.trim();
@@ -55,7 +64,8 @@ public class Main {
 							break;
 						}
 					}
-					g.addEdge(ASIN, salesRank, rating, similar);
+					//System.out.println("Title:  " + title + "   " + ASIN);
+					g.addEdge(title , ASIN, salesRank, rating, similar);
 				}
 			}
 
@@ -64,15 +74,26 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		//System.out.println(g.titles.get("Ostara: Customs, Spells & Rituals for the Rites of Spring"));
+		//System.out.println(g.graph.get("0738700827").weight);
+	
+		getSimilar("A Game of Thrones (A Song of Ice and Fire, Book 1)");
+		
 		/*
-		int counter = 0;
-		for (String s : g.graph.keySet()){
-			String temp = " ";
-			for (String t : g.graph.get(s).similar()){
-				temp += t + " ";
-			}
-			System.out.println(s + "  " + counter + temp);
-			counter ++;
-		}*/
+		 * int counter = 0; for (String s : g.graph.keySet()) {
+		 * System.out.println(s + "  " + counter + "  " +
+		 * g.graph.get(s).getWeight(1)); counter++; }
+		 */
+	}
+	
+	
+	
+	//CALLED IN MAIN METHOD OF THIS CLASS
+	public static void getSimilar(String title){
+		
+		SimilarProducts sp = new SimilarProducts(g,g.titles.get(title));
+		for (String s : sp.getSimilar().keySet()){
+			System.out.println(s +" "+ sp.getSimilar().get(s) + "  " + g.ASINS.get(s));
+		}
 	}
 }
