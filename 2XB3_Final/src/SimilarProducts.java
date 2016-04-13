@@ -1,56 +1,80 @@
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 
 public class SimilarProducts {
 	private Graph g;
-	HashMap<String, Float> similar = new HashMap<String, Float>();
+	private ArrayList<Product> similar = new ArrayList<Product>();
+	private HashMap<String, Float> visited = new HashMap<String, Float>();
 
-	public SimilarProducts(Graph g, String root) {
+	public SimilarProducts(Graph g, String[] titles) {
+		visited = new HashMap<>();
 		this.g = g;
-		BFS(root);
+		BFS(titles);
 	}
 
-	public HashMap<String, Float> getSimilar() {
+	// ********* REPLACE THE COLLECTIONS SORT WITH OUR OWN QUICKSORT ********
+	public ArrayList<Product> getSimilar() {
+		for (String s : visited.keySet()) {
+			similar.add(g.getGraph().get(s));
+		}
+		Collections.sort(similar);
+		if (similar.size() - 11 >= 0)
+			similar.subList(0, similar.size() - 10).clear();
 		return similar;
+	}
+
+	private void BFS(String[] titles) {
+		for (String title : titles) {
+			BFS(title);
+		}
 	}
 
 	private void BFS(String root) {
 		// Mark all the vertices as not visited(By default
 		// set as false)
-		similar = new HashMap<>();
+		
 
 		// Create a queue for BFS
 		LinkedList<String> queue = new LinkedList<String>();
 
 		// Mark the current node as visited and enqueue it
-		similar.put(root, (float) 0);
+		visited.put(root, (float) 0);
+		g.getGraph().get(root).emptyWeight();
 		queue.add(root);
 
-		int level = 0;
+		int level = 0; // the depth level of the search
 		while (queue.size() != 0) {
 			// Dequeue a vertex from queue and print it
 			root = queue.poll();
 
-			// Get all adjacent vertices of the dequeued vertex s
-			// If a adjacent has not been visited, then mark it
-			// visited and enqueue it
-			String[] i = g.graph.get(root).similar();
-			for (String s : i) {
+			if (root.equals("DONE_LAYER")) {
+				level++;
+			} else {
+				// Get all adjacent vertices of the dequeued vertex s
+				// If a adjacent has not been visited, then mark it
+				// visited and enqueue it
+				String[] i = g.getGraph().get(root).similar();
+				for (String s : i) {
 
-				if (!similar.containsKey(s)) {
-					// System.out.println(s);
-					try {
-						similar.put(s, g.graph.get(s).weight);
-						queue.add(s);
-					} catch (NullPointerException e) {
-						g.graph.remove(s);
-						//similar.put(s, (float) -10);
+					if (!visited.containsKey(s)) {
+						// System.out.println(s);
+						try {
+							visited.put(s, g.getGraph().get(s).getWeight(level));
+							queue.add(s);
+
+						} catch (NullPointerException e) {
+							g.getGraph().remove(s);
+							// similar.put(s, (float) -10);
+						}
+
 					}
-
 				}
-			}
-			if (similar.size() > 1000) {
-				break;
+				queue.add("DONE_LAYER");
+				if (visited.size() > 1000) {
+					break;
+				}
 			}
 
 		}

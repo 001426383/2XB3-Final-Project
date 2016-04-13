@@ -138,7 +138,4 @@ public class Parser {
 		return false;
 	}
 
-	public void BFS() {
-
-	}
 }
