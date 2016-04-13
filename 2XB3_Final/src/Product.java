@@ -1,9 +1,11 @@
 
 public class Product implements Comparable<Product>{
+	private String title;
 	private String ASIN;
 	private String[] similarArray;
 	private String author;
 	private float weight;
+	private float rating;
 	
 	//depth at which the offset starts to become negative
 	private final static float maxDepth = 50;
@@ -13,18 +15,22 @@ public class Product implements Comparable<Product>{
 	// rating to be (5 being less reliant on similarity/depth, and 0 being more)
 	private final static float SIMILARITY_COEFFICIENT = (float) 4.5;
 
-	public Product(String ASIN,String author, float salesRank, float rating, String[] similarArray) {
+	public Product(String title, String ASIN,String author, float salesRank, float rating, String[] similarArray) {
+		this.title = title;
 		this.ASIN = ASIN;
 		this.author = author;
 		this.similarArray = similarArray;
+		this.rating = rating;
 		weight = 0;
 		setWeight(salesRank, rating);
 	}
 
-	public Product(String ASIN, float salesRank, float rating, String[] similarArray) {
+	public Product(String title, String ASIN, float salesRank, float rating, String[] similarArray) {
+		this.title = title;
 		this.ASIN = ASIN;
-		this.author = "Author Unknown";
+		this.author = "N/A";
 		this.similarArray = similarArray;
+		this.rating = rating;
 		weight = 0;
 		setWeight(salesRank, rating);
 	}
@@ -70,7 +76,14 @@ public class Product implements Comparable<Product>{
 		
 	}
 	
-
+	public String getTitle(){
+		return title;
+	}
+	
+	public String toString(){
+			return title + " by " + author + " \t" + rating;
+	}
+	
 	@Override
 	public int compareTo(Product other) {
 		if (weight < other.getWeight()){

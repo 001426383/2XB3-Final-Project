@@ -9,6 +9,7 @@ public class Graph {
 	private HashMap<String, Product> graph;
 	private HashMap<String, String> ASINS;
 	private HashMap<String, String> titles;
+	private SimilarProducts similar;
 	
 	public Graph(String FILE_NAME, String[] SEARCH_TITLE){
 		setGraph(new HashMap<String, Product>());
@@ -57,6 +58,28 @@ public class Graph {
 							break;
 						}
 					}
+					
+					// find author
+					while ((line = br.readLine()) != null) {
+						if (line.startsWith("  categories:")) {
+							int numCat = Integer.parseInt(line.substring(14));
+							for (int i = 0; i < numCat; i++) {
+								line = br.readLine();
+								if (line.contains("Authors, A-Z")){
+									String[] s = line.split("]");
+									for (int j = 0; j < s.length; j++) {
+										if (s[j].contains("Authors, A-Z")){
+											if (j+2 >= s.length) break;
+											int end = s[j+2].indexOf("[");
+											author = s[j+2].substring(1, end);
+											break;
+										}
+									}
+								}
+							}
+							break;
+						}
+					}
 
 					while ((line = br.readLine()) != null) {
 						if (line.startsWith("  reviews:")) {
@@ -69,7 +92,10 @@ public class Graph {
 						}
 					}
 					// System.out.println("Title: " + title + " " + ASIN);
-					addEdge(title, ASIN, salesRank, rating, similar);
+					if (author.equals(""))
+						addEdge(title, ASIN, salesRank, rating, similar);
+					else addEdge(title, ASIN, author, salesRank, rating, similar);
+					author = "";
 				}
 			}
 
@@ -82,7 +108,7 @@ public class Graph {
 		// for the Rites of Spring"));
 		// System.out.println(g.graph.get("0738700827").weight);
 
-		getSimilar(SEARCH_TITLE);
+		this.similar = getSimilar(SEARCH_TITLE);
 
 		/*
 		 * int counter = 0; for (String s : g.graph.keySet()) {
@@ -98,14 +124,14 @@ public class Graph {
 	//ALLOWS YOU TO ADD AN EDGE WITH THE AUTHOR
 	private void addEdge(String title, String ASIN, String author, float salesRank, float rating,
 			String[] similarArray) {
-		getGraph().put(ASIN, new Product(ASIN, author, salesRank, rating, similarArray));
+		getGraph().put(ASIN, new Product(title, ASIN, author, salesRank, rating, similarArray));
 		ASINS.put(title, ASIN);
 		titles.put(ASIN, title);
 	}
 
 	//ALLOWS YOU TO ADD AN EDGE WITHOUT THE AUTHOR
 	private void addEdge(String title, String ASIN, float salesRank, float rating, String[] similarArray) {
-		getGraph().put(ASIN, new Product(ASIN,salesRank, rating, similarArray));
+		getGraph().put(ASIN, new Product(title, ASIN,salesRank, rating, similarArray));
 		ASINS.put(title, ASIN);
 		titles.put(ASIN, title);
 	}
@@ -115,22 +141,28 @@ public class Graph {
 	}
 	
 	//CALLS THE OTHER GETSIMILAR METHOD FOR EACH TITLE IN THE ARRAY
-	public void getSimilar(String[] stringTitles) {
+	public SimilarProducts getSimilar(String[] stringTitles) {
 		String[] stringASINS = new String[stringTitles.length];
 		for (int i = 0; i < stringASINS.length; i ++){
 			stringASINS[i] = ASINS.get(stringTitles[i]);
 		}
-		SimilarProducts sp = new SimilarProducts(this, stringASINS);
-		for (Product p : sp.getSimilar()) {
-			System.out.println("ASIN: " + p.getASIN() + " Rating: " + p.getWeight() +" Title: " + titles.get(p.getASIN()));
-		}
+		return new SimilarProducts(this, stringASINS);
 	}
+	
+	public SimilarProducts getSimilarList(){
+		return this.similar;
+	}
+	
 	public HashMap<String, Product> getGraph() {
 		return graph;
 	}
 
 	public void setGraph(HashMap<String, Product> graph) {
 		this.graph = graph;
+	}
+	
+	public Product getProduct(String s){
+		return graph.get(ASINS.get(s));
 	}
 
 }

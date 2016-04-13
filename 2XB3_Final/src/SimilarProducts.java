@@ -19,10 +19,52 @@ public class SimilarProducts {
 		for (String s : visited.keySet()) {
 			similar.add(g.getGraph().get(s));
 		}
-		Collections.sort(similar);
+		quickSort(similar);
 		if (similar.size() - 11 >= 0)
 			similar.subList(0, similar.size() - 10).clear();
 		return similar;
+	}
+
+	private void quickSort(ArrayList<Product> list) {
+		sort(list, 0, list.size()-1);
+		
+	}
+
+	private void sort(ArrayList<Product> list, int low, int high) {
+		if (high <= low) return;
+		int j = partition(list, low, high);
+		sort(list, low, j-1);
+		sort(list, j+1, high);
+		
+	}
+
+	private int partition(ArrayList<Product> list, int low, int high) {
+		int i = low;
+		int j = high + 1;
+		Product p = list.get(low);
+		
+		while (true){
+            while (list.get(++i).compareTo(p) == -1)
+                if (i == high) break;
+
+            while (p.compareTo(list.get(--j)) == -1)
+                if (j == low) break;
+
+            if (i >= j) break;
+
+            exch(list, i, j);
+		}
+		
+		exch(list, low, j);
+		
+		return j;
+	}
+
+	private void exch(ArrayList<Product> list, int a, int b) {
+        Product swap = list.get(a);
+        list.set(a, list.get(b));
+        list.set(b, swap);
+		
 	}
 
 	private void BFS(String[] titles) {
